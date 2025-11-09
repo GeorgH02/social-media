@@ -1,0 +1,36 @@
+from sqlmodel import Field, Session, SQLModel, create_engine, select
+
+class Post(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    image: str
+    text: str | None = None
+    user: str
+
+
+post_1 = Post(image="https://example.com/sunset.jpg", text="A sunset :)", user="john01")
+post_2 = Post(image="https://example.com/coffee.jpg", text="I like coffee", user="_maria2")
+post_3 = Post(image="https://example.com/dog.jpg", text="Cute dog alert", user="jessica184")
+
+
+engine = create_engine("sqlite:///social-media-database.db")
+
+SQLModel.metadata.create_all(engine)
+
+with Session(engine) as session:
+    session.add(post_1)
+    session.add(post_2)
+    session.add(post_3)
+    session.commit()
+    
+with Session(engine) as session:
+    statement = select(Post).order_by(Post.id.desc()).limit(1)
+    latest_post = session.exec(statement).first()
+    
+    if latest_post:
+        print("Latest Post:")
+        print(f"ID: {latest_post.id}")
+        print(f"User: {latest_post.user}")
+        print(f"Text: {latest_post.text}")
+        print(f"Image: {latest_post.image}")
+    else:
+        print("No posts found")
