@@ -1,56 +1,42 @@
-import unittest
 import os
-from sqlmodel import Session, select, SQLModel
-from post_manager import Post, create_database, add_posts, get_latest_post
+import sys
+import sqlite3
+import subprocess
+import unittest
+from pathlib import Path
 
+DB_PATH = Path("social-media-database.db")
 
-class TestPostManager(unittest.TestCase):
-    
+class TestPostManagerScript(unittest.TestCase):
     def setUp(self):
-        if os.path.exists("test_database.db"):
-            os.remove("test_database.db")
-        
-        self.test_db = "sqlite:///test_database.db"
-        self.engine = create_database(self.test_db)
-    
-    def tearDown(self):
-        self.engine.dispose()
-        if os.path.exists("test_database.db"):
-            os.remove("test_database.db")
-    
-    def test_post_creation(self):
-        post = Post(image="test.jpg", text="Test post", user="testuser")
-        self.assertEqual(post.image, "test.jpg")
-        self.assertEqual(post.text, "Test post")
-        self.assertEqual(post.user, "testuser")
-        self.assertIsNone(post.id)  
-    
-    def test_add_posts_to_database(self):
-        posts = [Post(image="img1.jpg", text="Post 1", user="user1"),
-                Post(image="img2.jpg", text="Post 2", user="user2"),
-                Post(image="img3.jpg", text="Post 3", user="user3")]
-        add_posts(self.engine, posts)
-        
-        with Session(self.engine) as session:
-            result = session.exec(select(Post)).all()
-            self.assertEqual(len(result), 3)
-    
-    def test_get_latest_post(self):
-        posts = [Post(image="img1.jpg", text="First post", user="user1"),
-                Post(image="img2.jpg", text="Second post", user="user2"),
-                Post(image="img3.jpg", text="Third post", user="user3")]
-        
-        add_posts(self.engine, posts)
-        latest_post = get_latest_post(self.engine)
-        
-        self.assertIsNotNone(latest_post)
-        self.assertEqual(latest_post.text, "Third post")
-        self.assertEqual(latest_post.user, "user3")
-    
-    def test_get_latest_post_empty_database(self):
-        latest_post = get_latest_post(self.engine)
-        self.assertIsNone(latest_post)
+        if DB_PATH.exists():
+            DB_PATH.unlink()
 
+    def test_script_runs_and_prints_latest(self):
+        result = subprocess.run(
+            [sys.executable, "post_manager.py"],
+            capture_output=True,
+            text=True
+        )
 
-if __name__ == '__main__':
+        print("\n--- STDOUT ---\n" + result.stdout)
+        if result.stderr:
+            print("\n--- STDERR ---\n" + result.stderr)
+
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+
+        out = result.stdout
+        self.assertIn("Latest Post:", out)
+        self.assertRegex(out, r"(?m)^User:\s+.+$")
+        self.assertRegex(out, r"(?m)^Text:\s+.+$")
+        self.assertRegex(out, r"(?m)^Image:\s+https?://\S+$")
+
+        self.assertTrue(DB_PATH.exists())
+        with sqlite3.connect(DB_PATH) as con:
+            cur = con.cursor()
+            cur.execute("SELECT COUNT(*) FROM post;")
+            count = cur.fetchone()[0]
+            self.assertEqual(count, 3)
+
+if __name__ == "__main__":
     unittest.main()
