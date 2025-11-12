@@ -6,25 +6,33 @@ class Post(SQLModel, table=True):
     text: str | None = None
     user: str
 
+def create_database(db_url: str = "sqlite:///social-media-database.db"):
+    engine = create_engine("sqlite:///social-media-database.db")
+    SQLModel.metadata.create_all(engine)
+    return engine
 
-post_1 = Post(image="https://example.com/sunset.jpg", text="A sunset :)", user="john01")
-post_2 = Post(image="https://example.com/coffee.jpg", text="I like coffee", user="_maria2")
-post_3 = Post(image="https://example.com/dog.jpg", text="Cute dog alert", user="jessica184")
+def add_posts(engine, posts: list[Post]):
+    with Session(engine) as session:
+        for post in posts:
+            session.add(post)
+        session.commit()
+
+def get_latest_post(engine):
+    with Session(engine) as session:
+        statement = select(Post).order_by(Post.id.desc()).limit(1)
+        latest_post = session.exec(statement).first()
+        return latest_post
 
 
-engine = create_engine("sqlite:///social-media-database.db")
-
-SQLModel.metadata.create_all(engine)
-
-with Session(engine) as session:
-    session.add(post_1)
-    session.add(post_2)
-    session.add(post_3)
-    session.commit()
+def main():
+    post_1 = Post(image="https://example.com/sunset.jpg", text="A sunset :)", user="john01")
+    post_2 = Post(image="https://example.com/coffee.jpg", text="I like coffee", user="_maria2")
+    post_3 = Post(image="https://example.com/dog.jpg", text="Cute dog alert", user="jessica184")
     
-with Session(engine) as session:
-    statement = select(Post).order_by(Post.id.desc()).limit(1)
-    latest_post = session.exec(statement).first()
+    engine = create_database()
+    add_posts(engine, [post_1, post_2, post_3])
+    
+    latest_post = get_latest_post(engine)
     
     if latest_post:
         print("Latest Post:")
@@ -34,3 +42,7 @@ with Session(engine) as session:
         print(f"Image: {latest_post.image}")
     else:
         print("No posts found")
+
+
+if __name__ == "__main__":
+    main()
