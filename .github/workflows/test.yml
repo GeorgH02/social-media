@@ -1,9 +1,13 @@
 name: Test Application
 
 on:
+  push:
+    branches:
+      - test
   pull_request:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   test:
@@ -11,7 +15,7 @@ jobs:
     
     strategy:
       matrix:
-        python-version: ['3.9', '3.10', '3.11']
+        python-version: ['3.10', '3.11']
     
     steps:
     - name: Checkout code
