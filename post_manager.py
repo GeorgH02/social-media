@@ -7,7 +7,7 @@ class Post(SQLModel, table=True):
     user: str
 
 def create_database(db_url: str = "sqlite:///social-media-database.db"):
-    engine = create_engine("sqlite:///social-media-database.db")
+    engine = create_engine(db_url)
     SQLModel.metadata.create_all(engine)
     return engine
 

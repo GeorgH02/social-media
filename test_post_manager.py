@@ -1,14 +1,20 @@
 import unittest
 import os
-from sqlmodel import Session, select
+from sqlmodel import Session, select, SQLModel
 from post_manager import Post, create_database, add_posts, get_latest_post
 
+
 class TestPostManager(unittest.TestCase):
+    
     def setUp(self):
+        if os.path.exists("test_database.db"):
+            os.remove("test_database.db")
+        
         self.test_db = "sqlite:///test_database.db"
         self.engine = create_database(self.test_db)
     
     def tearDown(self):
+        self.engine.dispose()
         if os.path.exists("test_database.db"):
             os.remove("test_database.db")
     
@@ -17,13 +23,12 @@ class TestPostManager(unittest.TestCase):
         self.assertEqual(post.image, "test.jpg")
         self.assertEqual(post.text, "Test post")
         self.assertEqual(post.user, "testuser")
-        self.assertIsNone(post.id) 
+        self.assertIsNone(post.id)  
     
     def test_add_posts_to_database(self):
         posts = [Post(image="img1.jpg", text="Post 1", user="user1"),
                 Post(image="img2.jpg", text="Post 2", user="user2"),
                 Post(image="img3.jpg", text="Post 3", user="user3")]
-        
         add_posts(self.engine, posts)
         
         with Session(self.engine) as session:
