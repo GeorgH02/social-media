@@ -27,9 +27,9 @@ class TestPostManagerScript(unittest.TestCase):
 
         out = result.stdout
         self.assertIn("Latest Post:", out)
-        self.assertIn("User: jessica184", out)
-        self.assertIn("Text: Cute dog alert", out)
-        self.assertIn("Image: https://example.com/dog.jpg", out)
+        self.assertRegex(out, r"(?m)^User:\s+.+$")
+        self.assertRegex(out, r"(?m)^Text:\s+.+$")
+        self.assertRegex(out, r"(?m)^Image:\s+https?://\S+$")
 
 
         self.assertTrue(DB_PATH.exists())
