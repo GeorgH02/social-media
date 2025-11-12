@@ -19,6 +19,10 @@ class TestPostManagerScript(unittest.TestCase):
             text=True
         )
 
+        print("\n--- STDOUT ---\n" + result.stdout)
+        if result.stderr:
+            print("\n--- STDERR ---\n" + result.stderr)
+
         self.assertEqual(result.returncode, 0, msg=result.stderr)
 
         out = result.stdout
@@ -27,11 +31,10 @@ class TestPostManagerScript(unittest.TestCase):
         self.assertIn("Text: Cute dog alert", out)
         self.assertIn("Image: https://example.com/dog.jpg", out)
 
-        # DB file created and contains 3 rows
+
         self.assertTrue(DB_PATH.exists())
         with sqlite3.connect(DB_PATH) as con:
             cur = con.cursor()
-            # default table name from SQLModel is "post"
             cur.execute("SELECT COUNT(*) FROM post;")
             count = cur.fetchone()[0]
             self.assertEqual(count, 3)
