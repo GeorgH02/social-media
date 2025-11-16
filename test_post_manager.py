@@ -12,6 +12,7 @@ class TestPostManagerScript(unittest.TestCase):
         if DB_PATH.exists():
             DB_PATH.unlink()
 
+
     def test_script_runs_and_prints_latest(self):
         result = subprocess.run(
             [sys.executable, "post_manager.py"],
