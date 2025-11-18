@@ -34,3 +34,9 @@ def create_post(post: Post):
         session.commit()
         session.refresh(post)
         return post
+
+@app.get("/users/{username}/posts", response_model=List[Post])
+def get_posts_by_user(username: str):
+    with Session(engine) as session:
+        posts = session.exec(select(Post).where(Post.user == username).order_by(Post.id.desc())).all()
+        return posts

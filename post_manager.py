@@ -1,10 +1,13 @@
 from sqlmodel import Field, Session, SQLModel, create_engine, select
+#from sqlalchemy import UniqueConstraint, Column, String
 
 class Post(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     image: str
     text: str | None = None
     user: str
+    #make user unique?
+    #user: str = Field(sa_column=Column("user", String, unique=True))
 
 def create_database(db_url: str = "sqlite:///social-media-database.db"):
     engine = create_engine(db_url)
