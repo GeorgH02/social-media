@@ -1,5 +1,4 @@
 from sqlmodel import Field, Session, SQLModel, create_engine, select
-#from sqlalchemy import UniqueConstraint, Column, String
 
 class Post(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True, sa_column_kwargs={"autoincrement": True})
@@ -7,7 +6,6 @@ class Post(SQLModel, table=True):
     text: str | None = None
     user: str
     
-#for API input
 class PostCreate(SQLModel):
     image: str
     text: str | None = None
