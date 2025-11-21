@@ -1,9 +1,10 @@
 from fastapi import FastAPI, HTTPException
 from sqlmodel import Session, select
 from typing import List
-from post_manager import Post, create_database
+from post_manager import Post, PostCreate, create_database
 
 # uvicorn rest_api:app --reload
+# /docs# for SwaggerUI
 
 engine = create_database()
 
@@ -28,15 +29,18 @@ def get_post(post_id: int):
         return post
 
 @app.post("/posts", response_model=Post, status_code=201)
-def create_post(post: Post):
+def create_post(post: PostCreate):
     with Session(engine) as session:
-        session.add(post)
+        db_post = Post.model_validate(post)
+        session.add(db_post)
         session.commit()
-        session.refresh(post)
-        return post
+        session.refresh(db_post)
+        return db_post
 
 @app.get("/users/{username}/posts", response_model=List[Post])
 def get_posts_by_user(username: str):
     with Session(engine) as session:
         posts = session.exec(select(Post).where(Post.user == username).order_by(Post.id.desc())).all()
+        if not posts:
+            raise HTTPException(status_code=404, detail="No posts found")
         return posts
