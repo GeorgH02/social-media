@@ -15,11 +15,7 @@ def root():
     return {"message": "Welcome to Social Media API"}
 
 @app.get("/posts", response_model=List[Post])
-def get_all_posts(
-    search: str | None = None,
-    user: str | None = None,
-    limit: int = 100
-):
+def get_all_posts(search: str | None = None,user: str | None = None,limit: int = 100):
     with Session(engine) as session:
         query = select(Post)
         if search:
@@ -27,7 +23,6 @@ def get_all_posts(
         if user:
             query = query.where(Post.user == user)
         query = query.order_by(Post.id.desc()).limit(limit)
-        
         posts = session.exec(query).all()
         return posts
 
