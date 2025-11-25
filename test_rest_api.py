@@ -1,15 +1,31 @@
 import unittest
 from fastapi.testclient import TestClient
-from sqlmodel import SQLModel
-from rest_api import app, engine
-from post_manager import Post, PostCreate
+from sqlmodel import SQLModel, create_engine
+from sqlalchemy.pool import StaticPool
 
-client = TestClient(app)
+import rest_api  
+
+
+# Shared in-memory SQLite DB for all connections
+test_engine = create_engine(
+    "sqlite://",  # in-memory
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool,  
+)
+
+
+rest_api.engine = test_engine
+
+
+SQLModel.metadata.create_all(test_engine)
+
+client = TestClient(rest_api.app)
 
 
 def reset_db():
-    SQLModel.metadata.drop_all(engine)
-    SQLModel.metadata.create_all(engine)
+    """Drop and recreate all tables before each test."""
+    SQLModel.metadata.drop_all(test_engine)
+    SQLModel.metadata.create_all(test_engine)
 
 
 class TestRestAPI(unittest.TestCase):
