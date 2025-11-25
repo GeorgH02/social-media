@@ -1,9 +1,6 @@
 name: Test Application
 
 on:
-  push:
-    branches:
-      - tests/rest-api
   pull_request:
     branches:
       - main
