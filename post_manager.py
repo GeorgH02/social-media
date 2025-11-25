@@ -1,7 +1,12 @@
 from sqlmodel import Field, Session, SQLModel, create_engine, select
 
 class Post(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True, sa_column_kwargs={"autoincrement": True})
+    image: str
+    text: str | None = None
+    user: str
+    
+class PostCreate(SQLModel):
     image: str
     text: str | None = None
     user: str
