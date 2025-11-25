@@ -3,7 +3,7 @@ name: Test Application
 on:
   push:
     branches:
-      - test/rest-api
+      - tests/rest-api
   pull_request:
     branches:
       - main
