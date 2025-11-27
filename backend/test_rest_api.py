@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 from sqlmodel import SQLModel, create_engine
 from sqlalchemy.pool import StaticPool
 
-import rest_api  
+import rest_api as rest_api  
 
 
 # Shared in-memory SQLite DB for all connections

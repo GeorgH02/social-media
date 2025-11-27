@@ -1,3 +1,4 @@
+import os
 from sqlmodel import Field, Session, SQLModel, create_engine, select
 
 class Post(SQLModel, table=True):
@@ -11,8 +12,17 @@ class PostCreate(SQLModel):
     text: str | None = None
     user: str
 
-def create_database(db_url: str = "sqlite:///social-media-database.db"):
-    engine = create_engine(db_url)
+class User(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True, sa_column_kwargs={"autoincrement": True})
+    name: str
+
+class UserCreate(SQLModel):
+    name: str
+
+def create_database():
+    backend_directory = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(backend_directory, "social-media-database.db")
+    engine = create_engine(f"sqlite:///{db_path}")
     SQLModel.metadata.create_all(engine)
     return engine
 
