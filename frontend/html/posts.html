@@ -28,6 +28,12 @@
         .post .text {
             margin-top: 10px;
         }
+        #categoryNavbar {
+            margin-top: 30px;
+        }
+        .btn {
+            margin: 10px;
+        }
     </style>
 </head>
 <body>
@@ -54,6 +60,28 @@
     <br>
     <br>
     <h1>Social Media Platform</h1>
+
+    <nav id="categoryNavbar" class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <ul class="navbar-nav me-auto" id="categoryItems">
+            </ul>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <button class="btn btn-secondary d-none" id="backToCategories">Back to continents</button>
+                </li>
+                <li class="nav-item">
+                    <button id="showFilters" class="btn btn-primary">More filters</button>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <nav id="filterNavbar" class="navbar navbar-expand-lg navbar-light bg-light d-none">
+        <div class="container-fluid">
+            <ul class="navbar-nav me-auto" id="filterItems">
+            </ul>
+        </div>
+    </nav>
 
     <div id="posts-list"></div>
 
