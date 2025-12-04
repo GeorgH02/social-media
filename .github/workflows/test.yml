@@ -1,14 +1,9 @@
 name: Test Application
 
 on:
-  push:
-    branches:
-    - feature/docker-setup
-
   pull_request:
     branches:
       - main
-      - feature/docker-setup
   workflow_dispatch:
 
 jobs:
