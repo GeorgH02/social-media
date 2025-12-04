@@ -4,7 +4,9 @@ on:
   push:
     branches:
       - main
-      - feature/docker-setup
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 env:
