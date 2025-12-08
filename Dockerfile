@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-WORKDIR /app/backend
+WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
@@ -9,7 +9,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
-COPY . /app
+COPY backend /app/backend
+COPY frontend /app/frontend
+
+WORKDIR /app/backend
 
 EXPOSE 8000
 

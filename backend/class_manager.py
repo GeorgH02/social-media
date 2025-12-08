@@ -19,10 +19,19 @@ class User(SQLModel, table=True):
 class UserCreate(SQLModel):
     name: str
 
+# def create_database():
+#     backend_directory = os.path.dirname(os.path.abspath(__file__))
+#     db_path = os.path.join(backend_directory, "social-media-database.db")
+#     engine = create_engine(f"sqlite:///{db_path}")
+#     SQLModel.metadata.create_all(engine)
+#     return engine
+
 def create_database():
-    backend_directory = os.path.dirname(os.path.abspath(__file__))
-    db_path = os.path.join(backend_directory, "social-media-database.db")
-    engine = create_engine(f"sqlite:///{db_path}")
+    DATABASE_URL = os.environ.get("DATABASE_URL")
+    if not DATABASE_URL:
+        print("DATABASE_URL not set — skipping database initialization")
+        return None
+    engine = create_engine(DATABASE_URL, echo=True)
     SQLModel.metadata.create_all(engine)
     return engine
 

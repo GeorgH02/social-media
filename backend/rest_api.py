@@ -22,8 +22,8 @@ def root():
     return RedirectResponse(url="/posts")
 
 @app.get("/users/{username}")
-def root():
-    return RedirectResponse(url="/users/{username}/posts")
+def redirect_user(username: str):
+    return RedirectResponse(url=f"/users/{username}/posts")
 
 @app.get("/posts")
 def posts_f():
@@ -91,11 +91,9 @@ def api_get_post(post_id: int):
 
 @app.post("/api/posts", response_model=Post, status_code=201)
 def api_create_post(post: PostCreate):
-
-    db_post = Post(image=post.image, text=post.text, user=post.user)
+    db_post = Post.model_validate(post)
 
     with Session(engine) as session:
-        db_post = Post.model_validate(post)
         session.add(db_post)
         session.commit()
         session.refresh(db_post)
@@ -126,16 +124,14 @@ if __name__ == "__main__":
     
 
 
-"""
-@app.get("/posts", response_model=List[Post])
-def get_all_posts(search: str | None = None,user: str | None = None,limit: int = 100):
-    with Session(engine) as session:
-        query = select(Post)
-        if search:
-            query = query.where(Post.text.contains(search))
-        if user:
-            query = query.where(Post.user == user)
-        query = query.order_by(Post.id.desc()).limit(limit)
-        posts = session.exec(query).all()
-        return posts
-"""
+# @app.get("/posts", response_model=List[Post])
+# def get_all_posts(search: str | None = None,user: str | None = None,limit: int = 100):
+#     with Session(engine) as session:
+#         query = select(Post)
+#         if search:
+#             query = query.where(Post.text.contains(search))
+#         if user:
+#             query = query.where(Post.user == user)
+#         query = query.order_by(Post.id.desc()).limit(limit)
+#         posts = session.exec(query).all()
+#         return posts
