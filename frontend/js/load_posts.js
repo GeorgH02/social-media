@@ -1,14 +1,13 @@
 $(document).ready(function() {
 
-    const categories = ["Europe", "Asia", "Africa", "North America", "South America", "Australia", "Antarctica"];
+    const categories = ["Europe", "Asia", "Africa", "North America", "South America", "Australia"];
     const subcategories = {
         "Europe": ["Austria", "Italy", "United Kingdom"],
         "Asia": ["China", "India"],
         "Africa": ["South Africa"],
         "North America": ["United States", "Canada", "Mexico"],
         "South America": ["Brazil"],
-        "Australia": ["Australia"],
-        "Antarctica": []
+        "Australia": ["Australia"]
     };
     const filters = ["City", "Nature"];
 
@@ -51,19 +50,12 @@ $(document).ready(function() {
     $(document).on("click", ".category", function (event) {
         event.preventDefault();
         const category = $(this).data("category");
-
-        if ($(this).hasClass("bg-primary text-white")) {
-        $(this).removeClass("bg-primary text-white");
-        $("#backToCategories").addClass("d-none");
-        return;
-        }
-
         $(".category").removeClass("bg-primary text-white");
         $(this).addClass("bg-primary text-white");
-
         showSubcategories(category);
-
         $("#backToCategories").removeClass("d-none");
+
+        updateURL();
     });
 
     $(document).on("click", ".subcategory", function (event) {
@@ -75,9 +67,13 @@ $(document).ready(function() {
         } else {
         selectedCategories = selectedCategories.filter(item => item !== subcategory);
         }
+
+        updateURL();
     });
 
     $(document).on("click", "#backToCategories", function () {
+        selectedCategories = [];
+        updateURL();
         showCategories();
         $("#backToCategories").addClass("d-none");
     });
@@ -91,6 +87,8 @@ $(document).ready(function() {
         } else {
         selectedFilters = selectedFilters.filter(item => item !== filter);
         }
+
+        updateURL();
     });
 
     $(document).on("click", "#showFilters", function (event) {
@@ -103,92 +101,88 @@ $(document).ready(function() {
     });
 
     function fetchPosts() {
-        const path = window.location.pathname; // current path
+        const params = new URLSearchParams(window.location.search);
+        const countryParam = params.get("country");
+        const filterParam = params.get("filter");
+        const username = window.location.pathname.split('/')[2];
 
-        if (path === '/posts') {
-            fetch('/api/posts')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch posts');
-                    }
-                    return response.json();
-                })
-                .then(posts => {
-                    const postsListElement = document.getElementById('posts-list');
-                    postsListElement.innerHTML = '';
-
-                    posts.forEach(post => {
-                        const postElement = document.createElement('div');
-                        postElement.classList.add('post');
-
-                        const userElement = document.createElement('div');
-                        userElement.classList.add('user');
-                        userElement.textContent = `User: ${post.user}`;
-
-                        const textElement = document.createElement('div');
-                        textElement.classList.add('text');
-                        textElement.textContent = post.text || 'No text';
-
-                        const imageElement = document.createElement('img');
-                        imageElement.src = post.image;
-                        imageElement.alt = post.text || 'Post image';
-
-                        postElement.appendChild(userElement);
-                        postElement.appendChild(imageElement);
-                        postElement.appendChild(textElement);
-
-                        postsListElement.appendChild(postElement);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error fetching posts:', error);
-                    const postsListElement = document.getElementById('posts-list');
-                    postsListElement.innerHTML = '<p>No posts yet</p>';
-                });
-        } else if (path.startsWith('/users/')) {
-            const username = path.split('/')[2]; // get username from path
-
-            fetch(`/api/users/${username}/posts`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch posts for user');
-                    }
-                    return response.json();
-                })
-                .then(posts => {
-                    const postsListElement = document.getElementById('posts-list');
-                    postsListElement.innerHTML = '';
-
-                    posts.forEach(post => {
-                        const postElement = document.createElement('div');
-                        postElement.classList.add('post');
-
-                        const userElement = document.createElement('div');
-                        userElement.classList.add('user');
-                        userElement.textContent = `User: ${post.user}`;
-
-                        const textElement = document.createElement('div');
-                        textElement.classList.add('text');
-                        textElement.textContent = post.text || 'No text';
-
-                        const imageElement = document.createElement('img');
-                        imageElement.src = post.image;
-                        imageElement.alt = post.text || 'Post image';
-
-                        postElement.appendChild(userElement);
-                        postElement.appendChild(imageElement);
-                        postElement.appendChild(textElement);
-
-                        postsListElement.appendChild(postElement);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error fetching posts:', error);
-                    const postsListElement = document.getElementById('posts-list');
-                    postsListElement.innerHTML = '<p>No posts yet</p>';
-                });
+        let apiUrl = '/api/posts';
+        if (window.location.pathname.startsWith('/users/') && username) {
+            apiUrl = `/api/users/${username}/posts`;
         }
+
+        const urlParams = [];
+        if (countryParam) urlParams.push(`country=${countryParam}`);
+        if (filterParam) urlParams.push(`filter=${filterParam}`);
+        if (urlParams.length > 0) {
+            apiUrl += `?${urlParams.join('&')}`;
+        }
+
+        fetch(apiUrl)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch posts');
+                }
+                return response.json();
+            })
+            .then(posts => {
+                const postsListElement = document.getElementById('posts-list');
+                postsListElement.innerHTML = '';
+
+                posts.forEach(post => {
+                    const postElement = document.createElement('div');
+                    postElement.classList.add('post');
+
+                    const userElement = document.createElement('div');
+                    userElement.classList.add('user');
+                    userElement.textContent = `User: ${post.user}`;
+
+                    const textElement = document.createElement('div');
+                    textElement.classList.add('text');
+                    textElement.textContent = post.text || 'No text';
+
+                    const imageElement = document.createElement('img');
+                    imageElement.src = post.image;
+                    imageElement.alt = post.text || 'Post image';
+
+                    postElement.appendChild(userElement);
+                    postElement.appendChild(imageElement);
+                    postElement.appendChild(textElement);
+
+                    postsListElement.appendChild(postElement);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching posts:', error);
+                const postsListElement = document.getElementById('posts-list');
+                postsListElement.innerHTML = '<p>No posts yet</p>';
+            });
     }
 
     fetchPosts();
+
+    function updateURL() {
+    const params = new URLSearchParams();
+
+    if (selectedCategories.length > 0) {
+        params.set("country", selectedCategories.join(","));
+    }
+    if (selectedFilters.length > 0) {
+        params.set("filter", selectedFilters.join(","));
+    }
+
+    let newUrl = '/posts';
+    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    
+    if (pathParts[0] === 'users' && pathParts[1]) {
+        newUrl = `/users/${pathParts[1]}/posts`;
+    }
+    if (params.toString()) {
+        newUrl += `?${params.toString()}`;
+    }
+
+    window.history.pushState({}, "", newUrl);
+    fetchPosts();
+    }
+
 });
