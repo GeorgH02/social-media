@@ -3,12 +3,13 @@ from sqlmodel import Field, Session, SQLModel, create_engine, select
 
 class Post(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True, sa_column_kwargs={"autoincrement": True})
-    image: str
+    image_full: str                     # path or URL to the full-size image
+    image_thumb: str | None = None      # path or URL to the reduced-size image
     text: str | None = None
     user: str
     
 class PostCreate(SQLModel):
-    image: str
+    image_full: str                     # client sends full-size image URL (for now)
     text: str | None = None
     user: str
 

@@ -6,6 +6,8 @@ import uvicorn
 from sqlmodel import Session, select
 from typing import List
 from class_manager import Post, User, PostCreate, UserCreate, create_database
+import pika
+import json
 
 # uvicorn rest_api:app --reload
 # /docs# for SwaggerUI
@@ -16,6 +18,26 @@ app = FastAPI(title="Social Media API")
 
 frontend_directory = os.path.join(os.path.dirname(__file__), "..", "frontend")
 app.mount("/frontend", StaticFiles(directory=frontend_directory), name="frontend")
+
+
+def send_resize_message(post_id: int, image_full: str) -> None:
+    connection = pika.BlockingConnection(
+        pika.ConnectionParameters(host="queue")
+    )
+    channel = connection.channel()
+    channel.queue_declare(queue="resize")
+
+    message = {
+        "post_id": post_id,
+        "image_full": image_full,
+    }
+    channel.basic_publish(
+        exchange="",
+        routing_key="resize",
+        body=json.dumps(message),
+    )
+    connection.close()
+
 
 @app.get("/")
 def root():
@@ -97,6 +119,10 @@ def api_create_post(post: PostCreate):
         session.add(db_post)
         session.commit()
         session.refresh(db_post)
+
+        send_resize_message(db_post.id, db_post.image_full)
+
+
         return db_post
     
 @app.post("/api/users", response_model=User, status_code=201)

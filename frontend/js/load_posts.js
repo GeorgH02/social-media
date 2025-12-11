@@ -130,7 +130,7 @@ $(document).ready(function() {
                         textElement.textContent = post.text || 'No text';
 
                         const imageElement = document.createElement('img');
-                        imageElement.src = post.image;
+                        imageElement.src = post.image_full;
                         imageElement.alt = post.text || 'Post image';
 
                         postElement.appendChild(userElement);

@@ -34,5 +34,13 @@ services:
         condition: service_healthy
     command: uvicorn rest_api:app --host 0.0.0.0 --port 8000 --reload
 
+  queue:
+    image: rabbitmq:3-management
+    container_name: social_media_queue
+    ports:
+      - "5672:5672"   
+      - "15672:15672" 
+
+
 volumes:
   postgres_data:

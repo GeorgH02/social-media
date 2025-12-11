@@ -5,7 +5,7 @@ $("#create-post-form").on("submit", function(event) {
 
     const postData = {
         user: loggedInUser,
-        image: $("#image").val(),
+        image_full: $("#image").val(),
         text: $("#content").val(),
     };
 
