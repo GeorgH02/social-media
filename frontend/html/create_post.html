@@ -48,6 +48,24 @@
             <label for="content">Text:</label>
             <textarea id="content" class="form-control" rows="10" placeholder="Text"></textarea>
         </div>
+        <nav id="categoryNavbar" class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <ul class="navbar-nav me-auto" id="categoryItems">
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                    <button class="btn btn-secondary d-none" id="backToCategories">Back to continents</button>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <nav id="filterNavbar" class="navbar navbar-expand-lg navbar-light bg-light d-none">
+            <div class="container-fluid">
+                <ul class="navbar-nav me-auto" id="filterItems">
+                </ul>
+            </div>
+        </nav>
         <button type="submit" class="btn btn-primary mt-3">Post</button>
         </form>
     </div>

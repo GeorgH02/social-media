@@ -6,11 +6,15 @@ class Post(SQLModel, table=True):
     image: str
     text: str | None = None
     user: str
+    country: str
+    filter: str
     
 class PostCreate(SQLModel):
     image: str
     text: str | None = None
     user: str
+    country: str
+    filter: str
 
 class User(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True, sa_column_kwargs={"autoincrement": True})
