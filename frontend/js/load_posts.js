@@ -130,8 +130,14 @@ $(document).ready(function() {
                         textElement.textContent = post.text || 'No text';
 
                         const imageElement = document.createElement('img');
-                        imageElement.src = post.image_full;
+                        imageElement.src = post.image_thumb ? post.image_thumb : post.image_full;
                         imageElement.alt = post.text || 'Post image';
+
+                        if (post.image_full) {
+                        imageElement.style.cursor = "pointer";
+                        imageElement.addEventListener("click", () => window.open(post.image_full, "_blank"));
+                        }
+
 
                         postElement.appendChild(userElement);
                         postElement.appendChild(imageElement);
@@ -172,8 +178,14 @@ $(document).ready(function() {
                         textElement.textContent = post.text || 'No text';
 
                         const imageElement = document.createElement('img');
-                        imageElement.src = post.image;
+                        imageElement.src = post.image_thumb ? post.image_thumb : post.image_full;
                         imageElement.alt = post.text || 'Post image';
+
+                        imageElement.style.cursor = "pointer";
+                        imageElement.addEventListener("click", () => {
+                            window.open(post.image_full, "_blank");
+                        });
+
 
                         postElement.appendChild(userElement);
                         postElement.appendChild(imageElement);

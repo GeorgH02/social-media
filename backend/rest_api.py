@@ -19,10 +19,16 @@ app = FastAPI(title="Social Media API")
 frontend_directory = os.path.join(os.path.dirname(__file__), "..", "frontend")
 app.mount("/frontend", StaticFiles(directory=frontend_directory), name="frontend")
 
+thumbs_dir = os.path.join(os.path.dirname(__file__), "..", "data", "thumbs")
+os.makedirs(thumbs_dir, exist_ok=True)
+app.mount("/thumbs", StaticFiles(directory=thumbs_dir), name="thumbs")
+
+
 
 def send_resize_message(post_id: int, image_full: str) -> None:
+    rabbit_host = os.getenv("RABBIT_HOST", "queue")
     connection = pika.BlockingConnection(
-        pika.ConnectionParameters(host="queue")
+        pika.ConnectionParameters(host=rabbit_host)
     )
     channel = connection.channel()
     channel.queue_declare(queue="resize")

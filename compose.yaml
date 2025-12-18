@@ -23,11 +23,13 @@ services:
     container_name: social_media_backend
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/social_media
+      RABBIT_HOST: queue
     ports:
       - "8000:8000"
     volumes:
       - ./backend:/app/backend
       - ./frontend:/app/frontend
+      - ./data/thumbs:/app/data/thumbs
     working_dir: /app/backend
     depends_on:
       db:
@@ -41,6 +43,28 @@ services:
       - "5672:5672"   
       - "15672:15672" 
 
+  resize_worker:
+    build:
+      context: .
+      dockerfile: backend/resize_service/Dockerfile
+    container_name: social_media_resize_worker
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/social_media
+      RABBIT_HOST: queue
+      RESIZE_QUEUE: resize
+      THUMB_DIR: /data/thumbs
+      THUMB_PUBLIC_PREFIX: /thumbs
+      THUMB_SIZE: 256
+    volumes:
+      - ./data/thumbs:/data/thumbs
+    depends_on:
+      db:
+        condition: service_healthy
+      queue:
+        condition: service_started
+
 
 volumes:
   postgres_data:
+
+  
