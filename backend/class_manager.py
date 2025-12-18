@@ -7,11 +7,15 @@ class Post(SQLModel, table=True):
     image_thumb: str | None = None      # path or URL to the reduced-size image
     text: str | None = None
     user: str
+    country: str
+    filter: str
     
 class PostCreate(SQLModel):
     image_full: str                     # client sends full-size image URL (for now)
     text: str | None = None
     user: str
+    country: str
+    filter: str
 
 class User(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True, sa_column_kwargs={"autoincrement": True})

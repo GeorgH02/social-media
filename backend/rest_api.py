@@ -1,10 +1,10 @@
 import os
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, RedirectResponse
 import uvicorn
 from sqlmodel import Session, select
-from typing import List
+from typing import List, Optional
 from class_manager import Post, User, PostCreate, UserCreate, create_database
 import pika
 import json
@@ -96,17 +96,40 @@ def api_get_user_by_username(username: str):
 
 
 @app.get("/api/users/{username}/posts", response_model=List[Post])
-def api_get_posts_by_user(username: str):
+def api_get_posts_by_user(username: str, 
+                          country: Optional[str] = Query(None, alias="country"),
+                          filter: Optional[str] = Query(None, alias="filter")
+                          ):
     with Session(engine) as session:
-        posts = session.exec(select(Post).where(Post.user == username).order_by(Post.id.desc())).all()
+        query = select(Post).where(Post.user == username).order_by(Post.id.desc())
+        if country:
+            countries = country.split(",")
+            query = query.where(Post.country.in_(countries))
+        if filter:
+            filters = filter.split(",")
+            query = query.where(Post.filter.in_(filters))
+
+        posts = session.exec(query).all()
         if not posts:
-            raise HTTPException(status_code=404, detail="No posts found")
+            raise HTTPException(status_code=404, detail="No posts found for this user")
         return posts
 
 @app.get("/api/posts", response_model=List[Post])
-def api_get_all_posts():
+def api_get_all_posts(  country: Optional[str] = Query(None, alias="country"),
+                        filter: Optional[str] = Query(None, alias="filter")
+                    ):
     with Session(engine) as session:
-        posts = session.exec(select(Post).order_by(Post.id.desc())).all()
+        query = select(Post).order_by(Post.id.desc())
+        if country:
+            countries = country.split(",")
+            query = query.where(Post.country.in_(countries))
+        if filter:
+            filters = filter.split(",")
+            query = query.where(Post.filter.in_(filters))
+
+        posts = session.exec(query).all()
+        if not posts:
+            raise HTTPException(status_code=404, detail="No posts found")
         return posts
 
 @app.get("/api/posts/{post_id}", response_model=Post)
