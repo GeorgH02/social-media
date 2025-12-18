@@ -1,0 +1,6 @@
+pika
+pillow
+requests
+psycopg2-binary
+sqlmodel
+sqlalchemy

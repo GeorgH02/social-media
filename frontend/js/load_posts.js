@@ -100,22 +100,116 @@ $(document).ready(function() {
         }
     });
 
-    function fetchPosts() {
-        const params = new URLSearchParams(window.location.search);
-        const countryParam = params.get("country");
-        const filterParam = params.get("filter");
-        const username = window.location.pathname.split('/')[2];
+function fetchPosts() {
+  const params = new URLSearchParams(window.location.search);
+  const countryParam = params.get("country");
+  const filterParam = params.get("filter");
+  const username = window.location.pathname.split("/")[2];
 
-        let apiUrl = '/api/posts';
-        if (window.location.pathname.startsWith('/users/') && username) {
-            apiUrl = `/api/users/${username}/posts`;
+  let apiUrl = "/api/posts";
+  if (window.location.pathname.startsWith("/users/") && username) {
+    apiUrl = `/api/users/${username}/posts`;
+  }
+
+  const urlParams = [];
+  if (countryParam) urlParams.push(`country=${countryParam}`);
+  if (filterParam) urlParams.push(`filter=${filterParam}`);
+  if (urlParams.length > 0) {
+    apiUrl += `?${urlParams.join("&")}`;
+  }
+
+  fetch(apiUrl)
+    .then((response) => {
+      if (!response.ok) throw new Error("Failed to fetch posts");
+      return response.json();
+    })
+    .then((posts) => {
+      const postsListElement = document.getElementById("posts-list");
+      postsListElement.innerHTML = "";
+
+      posts.forEach((post) => {
+        const postElement = document.createElement("div");
+        postElement.classList.add("post");
+
+        const userElement = document.createElement("div");
+        userElement.classList.add("user");
+        userElement.textContent = `User: ${post.user}`;
+
+        const textElement = document.createElement("div");
+        textElement.classList.add("text");
+        textElement.textContent = post.text || "No text";
+
+        const imageElement = document.createElement("img");
+        imageElement.src = post.image_thumb ? post.image_thumb : post.image_full;
+        imageElement.alt = post.text || "Post image";
+
+        if (post.image_full) {
+          imageElement.style.cursor = "pointer";
+          imageElement.addEventListener("click", () =>
+            window.open(post.image_full, "_blank")
+          );
         }
 
-        const urlParams = [];
-        if (countryParam) urlParams.push(`country=${countryParam}`);
-        if (filterParam) urlParams.push(`filter=${filterParam}`);
-        if (urlParams.length > 0) {
-            apiUrl += `?${urlParams.join('&')}`;
+        postElement.appendChild(userElement);
+        postElement.appendChild(imageElement);
+        postElement.appendChild(textElement);
+
+        postsListElement.appendChild(postElement);
+      });
+    })
+    .catch((error) => {
+      console.error("Error fetching posts:", error);
+      const postsListElement = document.getElementById("posts-list");
+      postsListElement.innerHTML = "<p>No posts yet</p>";
+    });
+}else if (path.startsWith('/users/')) {
+            const username = path.split('/')[2]; // get username from path
+
+            fetch(`/api/users/${username}/posts`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch posts for user');
+                    }
+                    return response.json();
+                })
+                .then(posts => {
+                    const postsListElement = document.getElementById('posts-list');
+                    postsListElement.innerHTML = '';
+
+                    posts.forEach(post => {
+                        const postElement = document.createElement('div');
+                        postElement.classList.add('post');
+
+                        const userElement = document.createElement('div');
+                        userElement.classList.add('user');
+                        userElement.textContent = `User: ${post.user}`;
+
+                        const textElement = document.createElement('div');
+                        textElement.classList.add('text');
+                        textElement.textContent = post.text || 'No text';
+
+                        const imageElement = document.createElement('img');
+                        imageElement.src = post.image_thumb ? post.image_thumb : post.image_full;
+                        imageElement.alt = post.text || 'Post image';
+
+                        imageElement.style.cursor = "pointer";
+                        imageElement.addEventListener("click", () => {
+                            window.open(post.image_full, "_blank");
+                        });
+
+
+                        postElement.appendChild(userElement);
+                        postElement.appendChild(imageElement);
+                        postElement.appendChild(textElement);
+
+                        postsListElement.appendChild(postElement);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching posts:', error);
+                    const postsListElement = document.getElementById('posts-list');
+                    postsListElement.innerHTML = '<p>No posts yet</p>';
+                });
         }
 
         fetch(apiUrl)
