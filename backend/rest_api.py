@@ -8,6 +8,9 @@ from typing import List, Optional
 from class_manager import Post, User, PostCreate, UserCreate, create_database
 import pika
 import json
+from ml import classify_text
+from starlette.concurrency import run_in_threadpool
+import logging
 
 # uvicorn rest_api:app --reload
 # /docs# for SwaggerUI
@@ -22,8 +25,6 @@ app.mount("/frontend", StaticFiles(directory=frontend_directory), name="frontend
 thumbs_dir = os.path.join(os.path.dirname(__file__), "..", "data", "thumbs")
 os.makedirs(thumbs_dir, exist_ok=True)
 app.mount("/thumbs", StaticFiles(directory=thumbs_dir), name="thumbs")
-
-
 
 def send_resize_message(post_id: int, image_full: str) -> None:
     rabbit_host = os.getenv("RABBIT_HOST", "queue")
@@ -151,7 +152,6 @@ def api_create_post(post: PostCreate):
 
         send_resize_message(db_post.id, db_post.image_full)
 
-
         return db_post
     
 @app.post("/api/users", response_model=User, status_code=201)
@@ -170,23 +170,24 @@ def api_create_user(user: UserCreate):
         return db_user
 
 
+@app.get("/api/posts/{post_id}/sentiment")
+async def api_get_post_sentiment(post_id: int):
+    with Session(engine) as session:
+        post = session.get(Post, post_id)
+        if not post:
+            raise HTTPException(status_code=404, detail="Post not found")
+        if not post.text:
+            raise HTTPException(status_code=400, detail="Post has no text to analyze")
+        try:
+            result = await run_in_threadpool(classify_text, post.text)
+            label = max(result[0], key=lambda d: d["score"])["label"]
+            page_result = f"The sentiment of this post is {label}."
+            return {"post_id": post_id, "text": post.text, "sentiment": page_result}
+        except Exception as e:
+            logging.exception("Sentiment analysis failed for post %s", post_id)
+            raise HTTPException(status_code=500, detail=f"Sentiment analysis failed: {e}")
 
-    
+
+
 if __name__ == "__main__":
     uvicorn.run("rest_api:app", host="127.0.0.1", port=8000, reload=True)
-
-
-    
-
-
-# @app.get("/posts", response_model=List[Post])
-# def get_all_posts(search: str | None = None,user: str | None = None,limit: int = 100):
-#     with Session(engine) as session:
-#         query = select(Post)
-#         if search:
-#             query = query.where(Post.text.contains(search))
-#         if user:
-#             query = query.where(Post.user == user)
-#         query = query.order_by(Post.id.desc()).limit(limit)
-#         posts = session.exec(query).all()
-#         return posts

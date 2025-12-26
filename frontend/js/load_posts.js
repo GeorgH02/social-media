@@ -101,6 +101,34 @@ $(document).ready(function() {
         }
     });
 
+    $(document).on('click', '.sentiment-btn', function (event) {
+        event.preventDefault();
+        const postId = $(this).data('post-id');
+        const btn = $(this);
+        btn.prop('disabled', true).text('Loading...');
+        const resultContainer = btn.closest('.post').querySelector ? btn.closest('.post').querySelector('.sentiment-result') : btn.siblings('.sentiment-result')[0];
+
+        fetch(`/api/posts/${postId}/sentiment`)
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to fetch sentiment');
+                return response.json();
+            })
+            .then(data => {
+                btn.prop('disabled', false).text('Sentiment');
+                const text = data && data.sentiment ? JSON.stringify(data.sentiment) : 'No sentiment';
+                if (resultContainer) {
+                    resultContainer.textContent = text;
+                } else {
+                    btn.after(`<div class="sentiment-result">${text}</div>`);
+                }
+            })
+            .catch(err => {
+                console.error('Sentiment error:', err);
+                btn.prop('disabled', false).text('Sentiment');
+                alert('Error fetching sentiment');
+            });
+    });
+
 function fetchPosts() {
   const params = new URLSearchParams(window.location.search);
   const countryParam = params.get("country");
@@ -154,6 +182,22 @@ function fetchPosts() {
                     postElement.appendChild(userElement);
                     postElement.appendChild(imageElement);
                     postElement.appendChild(textElement);
+
+                    // sentiment button and result container
+                    const sentimentBtn = document.createElement('button');
+                    sentimentBtn.textContent = 'Sentiment';
+                    sentimentBtn.classList.add('btn', 'btn-sm', 'btn-outline-primary', 'sentiment-btn');
+                    sentimentBtn.setAttribute('data-post-id', post.id);
+
+                    const sentimentResult = document.createElement('div');
+                    sentimentResult.classList.add('sentiment-result');
+                    sentimentResult.style.marginTop = '6px';
+
+                    const btnWrapper = document.createElement('div');
+                    btnWrapper.appendChild(sentimentBtn);
+                    btnWrapper.appendChild(sentimentResult);
+
+                    postElement.appendChild(btnWrapper);
 
                     postsListElement.appendChild(postElement);
                 });
