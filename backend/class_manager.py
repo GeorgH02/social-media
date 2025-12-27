@@ -24,13 +24,6 @@ class User(SQLModel, table=True):
 class UserCreate(SQLModel):
     name: str
 
-# def create_database():
-#     backend_directory = os.path.dirname(os.path.abspath(__file__))
-#     db_path = os.path.join(backend_directory, "social-media-database.db")
-#     engine = create_engine(f"sqlite:///{db_path}")
-#     SQLModel.metadata.create_all(engine)
-#     return engine
-
 def create_database():
     DATABASE_URL = os.environ.get("DATABASE_URL")
     if not DATABASE_URL:

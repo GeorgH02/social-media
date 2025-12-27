@@ -183,7 +183,6 @@ function fetchPosts() {
                     postElement.appendChild(imageElement);
                     postElement.appendChild(textElement);
 
-                    // sentiment button and result container
                     const sentimentBtn = document.createElement('button');
                     sentimentBtn.textContent = 'Sentiment';
                     sentimentBtn.classList.add('btn', 'btn-sm', 'btn-outline-primary', 'sentiment-btn');

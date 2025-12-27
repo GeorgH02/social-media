@@ -188,6 +188,5 @@ async def api_get_post_sentiment(post_id: int):
             raise HTTPException(status_code=500, detail=f"Sentiment analysis failed: {e}")
 
 
-
 if __name__ == "__main__":
     uvicorn.run("rest_api:app", host="127.0.0.1", port=8000, reload=True)
