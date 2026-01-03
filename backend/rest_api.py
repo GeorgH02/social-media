@@ -8,7 +8,7 @@ from typing import List, Optional
 from class_manager import Post, User, PostCreate, UserCreate, create_database
 import pika
 import json
-from ml import classify_text
+from ml_service.ml import classify_text
 from starlette.concurrency import run_in_threadpool
 import logging
 
