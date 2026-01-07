@@ -11,7 +11,6 @@ RABBIT_HOST = os.getenv("RABBIT_HOST", "queue")
 QUEUE_NAME = os.getenv("ML_QUEUE", "sentiment")
 
 def ensure_connection() -> pika.BlockingConnection:
-    """Establish connection to RabbitMQ with retries."""
     max_retries = 5
     retry_delay = 2
     
@@ -35,7 +34,6 @@ def ensure_connection() -> pika.BlockingConnection:
                 raise
 
 def process_message(ch, method, properties, body):
-    """Process incoming sentiment analysis request."""
     try:
         message = json.loads(body)
         text = message.get("text")
@@ -49,7 +47,6 @@ def process_message(ch, method, properties, body):
         logger.info(f"Processing request {request_id}: analyzing text")
         result = classify_text(text)
         
-        # Extract the label with highest score
         label = max(result[0], key=lambda d: d["score"])["label"]
         sentiment = f"The sentiment of this text is {label}."
         
@@ -61,7 +58,6 @@ def process_message(ch, method, properties, body):
         ch.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
 
 def main():
-    """Start the ML worker service."""
     logger.info("Starting ML worker service")
     
     import os
@@ -77,7 +73,6 @@ def main():
     QUEUE_NAME = os.getenv("ML_QUEUE", "sentiment")
 
     def ensure_connection() -> pika.BlockingConnection:
-        """Establish connection to RabbitMQ with retries."""
         max_retries = 5
         retry_delay = 2
     
@@ -101,7 +96,6 @@ def main():
                     raise
 
     def process_message(ch, method, properties, body):
-        """Process incoming sentiment analysis request."""
         try:
             message = json.loads(body)
             text = message.get("text")
@@ -115,7 +109,6 @@ def main():
             logger.info(f"Processing request {request_id}: analyzing text")
             result = classify_text(text)
         
-            # Extract the label with highest score
             label = max(result[0], key=lambda d: d["score"])["label"]
             sentiment = f"The sentiment of this text is {label}."
         
@@ -127,7 +120,6 @@ def main():
             ch.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
 
     def main():
-        """Start the ML worker service."""
         logger.info("Starting ML worker service")
     
         connection = ensure_connection()
