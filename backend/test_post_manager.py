@@ -17,7 +17,7 @@ class TestPostManagerScript(unittest.TestCase):
 
     def test_script_runs_and_prints_latest(self):
         result = subprocess.run(
-            [sys.executable, "post_manager.py"],
+            [sys.executable, "class_manager.py"],
             capture_output=True,
             text=True
         )
