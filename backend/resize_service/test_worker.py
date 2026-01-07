@@ -1,13 +1,7 @@
 import unittest
 import json
 import os
-from unittest.mock import patch, MagicMock
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).parent))
-
-from worker import ensure_connection, process_message
+from unittest.mock import patch
 
 class TestResizeWorker(unittest.TestCase):
     def test_ensure_connection_environment_variable(self):
