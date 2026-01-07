@@ -106,6 +106,11 @@ def api_get_posts_by_user(username: str,
                           filter: Optional[str] = Query(None, alias="filter")
                           ):
     with Session(engine) as session:
+        # Verify user exists first
+        user = session.exec(select(User).where(User.name == username)).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
         query = select(Post).where(Post.user == username).order_by(Post.id.desc())
         if country:
             countries = country.split(",")
@@ -115,8 +120,6 @@ def api_get_posts_by_user(username: str,
             query = query.where(Post.filter.in_(filters))
 
         posts = session.exec(query).all()
-        if not posts:
-            raise HTTPException(status_code=404, detail="No posts found for this user")
         return posts
 
 @app.get("/api/posts", response_model=List[Post])
@@ -133,8 +136,6 @@ def api_get_all_posts(  country: Optional[str] = Query(None, alias="country"),
             query = query.where(Post.filter.in_(filters))
 
         posts = session.exec(query).all()
-        if not posts:
-            raise HTTPException(status_code=404, detail="No posts found")
         return posts
 
 @app.get("/api/posts/{post_id}", response_model=Post)
