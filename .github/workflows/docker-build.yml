@@ -30,6 +30,9 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Set test database URL
+        run: echo "DATABASE_URL=sqlite:///test.db" >> $GITHUB_ENV
+
       - name: Install test dependencies
         run: |
           python -m pip install --upgrade pip
