@@ -42,6 +42,7 @@ jobs:
       - name: Run backend tests
         run: |
           cd backend
+          export RABBIT_HOST=localhost
           python -m unittest discover -s . -p "test_*.py" -v
 
       - name: Run ML service tests

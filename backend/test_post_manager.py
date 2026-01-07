@@ -2,9 +2,11 @@ import sys
 import sqlite3
 import subprocess
 import unittest
+import os
 from pathlib import Path
 
-DB_PATH = Path("social-media-database.db")
+# Use DATABASE_URL if set (from CI), otherwise use default
+DB_PATH = Path(os.getenv("DATABASE_URL", "sqlite:///social-media-database.db").replace("sqlite:///", ""))
 
 
 class TestPostManagerScript(unittest.TestCase):

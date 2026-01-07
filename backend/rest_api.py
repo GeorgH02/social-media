@@ -27,23 +27,27 @@ os.makedirs(thumbs_dir, exist_ok=True)
 app.mount("/thumbs", StaticFiles(directory=thumbs_dir), name="thumbs")
 
 def send_resize_message(post_id: int, image_full: str) -> None:
-    rabbit_host = os.getenv("RABBIT_HOST", "queue")
-    connection = pika.BlockingConnection(
-        pika.ConnectionParameters(host=rabbit_host)
-    )
-    channel = connection.channel()
-    channel.queue_declare(queue="resize")
+    try:
+        rabbit_host = os.getenv("RABBIT_HOST", "queue")
+        connection = pika.BlockingConnection(
+            pika.ConnectionParameters(host=rabbit_host, connection_attempts=1, retry_delay=0)
+        )
+        channel = connection.channel()
+        channel.queue_declare(queue="resize")
 
-    message = {
-        "post_id": post_id,
-        "image_full": image_full,
-    }
-    channel.basic_publish(
-        exchange="",
-        routing_key="resize",
-        body=json.dumps(message),
-    )
-    connection.close()
+        message = {
+            "post_id": post_id,
+            "image_full": image_full,
+        }
+        channel.basic_publish(
+            exchange="",
+            routing_key="resize",
+            body=json.dumps(message),
+        )
+        connection.close()
+    except Exception as e:
+        # Log error but don't fail - RabbitMQ may not be available in all environments
+        print(f"Warning: Could not send resize message: {e}")
 
 
 @app.get("/")

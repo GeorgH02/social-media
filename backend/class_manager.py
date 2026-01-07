@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from sqlmodel import Field, Session, SQLModel, create_engine, select
 
 class Post(SQLModel, table=True):
@@ -27,8 +28,12 @@ class UserCreate(SQLModel):
 def create_database():
     DATABASE_URL = os.environ.get("DATABASE_URL")
     if not DATABASE_URL:
-        print("DATABASE_URL not set — skipping database initialization")
-        return None
+        # Use a file in the same directory as this script
+        db_path = Path(__file__).parent / "social-media-database.db"
+        DATABASE_URL = f"sqlite:///{db_path}"
+        print(f"DATABASE_URL not set — using default: {DATABASE_URL}")
+    else:
+        print(f"DATABASE_URL is set: {DATABASE_URL}")
     engine = create_engine(DATABASE_URL, echo=True)
     SQLModel.metadata.create_all(engine)
     return engine
