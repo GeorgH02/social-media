@@ -45,7 +45,9 @@ class TestRestAPI(unittest.TestCase):
         payload = {
             "user": "alice",
             "text": "Hello from API test",
-            "image": "https://example.com/image.jpg",
+            "image_full": "https://example.com/image.jpg",
+            "country": "Austria",
+            "filter": "City"
         }
         resp = client.post("/api/posts", json=payload)
         self.assertEqual(resp.status_code, 201)
