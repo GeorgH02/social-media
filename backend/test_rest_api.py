@@ -66,15 +66,23 @@ class TestRestAPI(unittest.TestCase):
         self.assertEqual(fetched["user"], "alice")
 
     def test_get_all_posts_and_filtering(self):
+        # Create users first
+        client.post("/api/users", json={"name": "alice"})
+        client.post("/api/users", json={"name": "bob"})
+        
         p1 = {
             "user": "alice",
             "text": "I love pizza",
-            "image": "https://example.com/a.jpg",
+            "image_full": "https://example.com/a.jpg",
+            "country": "Austria",
+            "filter": "City"
         }
         p2 = {
             "user": "bob",
             "text": "I love pasta",
-            "image": "https://example.com/b.jpg",
+            "image_full": "https://example.com/b.jpg",
+            "country": "Italy",
+            "filter": "Nature"
         }
         client.post("/api/posts", json=p1)
         client.post("/api/posts", json=p2)
@@ -102,15 +110,22 @@ class TestRestAPI(unittest.TestCase):
         """
 
     def test_get_posts_by_user_endpoint(self):
+        # Create user first
+        client.post("/api/users", json={"name": "alice"})
+        
         p1 = {
             "user": "alice",
             "text": "First",
-            "image": "https://example.com/1.jpg",
+            "image_full": "https://example.com/1.jpg",
+            "country": "Austria",
+            "filter": "City"
         }
         p2 = {
             "user": "alice",
             "text": "Second",
-            "image": "https://example.com/2.jpg",
+            "image_full": "https://example.com/2.jpg",
+            "country": "Italy",
+            "filter": "Nature"
         }
         client.post("/api/posts", json=p1)
         client.post("/api/posts", json=p2)
@@ -131,7 +146,7 @@ class TestRestAPI(unittest.TestCase):
         resp = client.get("/api/users/ghost/posts")
         self.assertEqual(resp.status_code, 404)
         data = resp.json()
-        self.assertEqual(data["detail"], "No posts found")
+        self.assertEqual(data["detail"], "User not found")
 
 
 if __name__ == "__main__":
