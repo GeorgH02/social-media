@@ -59,12 +59,6 @@ def process_message(ch, method, properties, body):
 
 def main():
     logger.info("Starting ML worker service")
-    
-    import os
-    import json
-    import logging
-    import pika
-    from ml import classify_text
 
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)

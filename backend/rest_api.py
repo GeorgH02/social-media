@@ -46,7 +46,6 @@ def send_resize_message(post_id: int, image_full: str) -> None:
         )
         connection.close()
     except Exception as e:
-        # Log error but don't fail - RabbitMQ may not be available in all environments
         print(f"Warning: Could not send resize message: {e}")
 
 
@@ -106,7 +105,6 @@ def api_get_posts_by_user(username: str,
                           filter: Optional[str] = Query(None, alias="filter")
                           ):
     with Session(engine) as session:
-        # Verify user exists first
         user = session.exec(select(User).where(User.name == username)).first()
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
@@ -162,12 +160,10 @@ def api_create_post(post: PostCreate):
 @app.post("/api/users", response_model=User, status_code=201)
 def api_create_user(user: UserCreate):
     with Session(engine) as session:
-        # check if user already exists
         existing_user = session.exec(select(User).where(User.name == user.name)).first()
         if existing_user:
             raise HTTPException(status_code=400, detail="User already exists")
 
-        # create new user if not found
         db_user = User(name=user.name)
         session.add(db_user)
         session.commit()

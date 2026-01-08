@@ -1,7 +1,6 @@
 import unittest
 from ml import classify_text
 
-
 class TestMLService(unittest.TestCase):
     def test_classify_text_with_positive_sentiment(self):
         result = classify_text("I love this! It's amazing!")

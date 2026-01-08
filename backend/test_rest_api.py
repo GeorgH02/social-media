@@ -5,22 +5,17 @@ from sqlalchemy.pool import StaticPool
 
 import rest_api as rest_api  
 
-
-# Shared in-memory SQLite DB for all connections
 test_engine = create_engine(
-    "sqlite://",  # in-memory
+    "sqlite://",
     connect_args={"check_same_thread": False},
     poolclass=StaticPool,  
 )
 
-
 rest_api.engine = test_engine
-
 
 SQLModel.metadata.create_all(test_engine)
 
 client = TestClient(rest_api.app)
-
 
 def reset_db():
     """Drop and recreate all tables before each test."""
@@ -32,14 +27,6 @@ class TestRestAPI(unittest.TestCase):
 
     def setUp(self):
         reset_db()
-
-    """
-    def test_root_endpoint(self):
-        resp = client.get("/")
-        self.assertEqual(resp.status_code, 200)
-        data = resp.json()
-        self.assertEqual(data["message"], "Welcome to Social Media API")
-    """
 
     def test_create_post_and_get_by_id(self):
         payload = {
@@ -66,7 +53,6 @@ class TestRestAPI(unittest.TestCase):
         self.assertEqual(fetched["user"], "alice")
 
     def test_get_all_posts_and_filtering(self):
-        # Create users first
         client.post("/api/users", json={"name": "alice"})
         client.post("/api/users", json={"name": "bob"})
         
@@ -92,25 +78,7 @@ class TestRestAPI(unittest.TestCase):
         all_posts = resp_all.json()
         self.assertEqual(len(all_posts), 2)
 
-        """
-        # filter by user
-        resp_alice = client.get("/api/posts", params={"user": "alice"})
-        self.assertEqual(resp_alice.status_code, 200)
-        posts_alice = resp_alice.json()
-        self.assertEqual(len(posts_alice), 1)
-        self.assertEqual(posts_alice[0]["user"], "alice")
-
-        
-        # filter by search text
-        resp_search = client.get("/posts", params={"search": "pasta"})
-        self.assertEqual(resp_search.status_code, 200)
-        posts_search = resp_search.json()
-        self.assertEqual(len(posts_search), 1)
-        self.assertEqual(posts_search[0]["user"], "bob")
-        """
-
     def test_get_posts_by_user_endpoint(self):
-        # Create user first
         client.post("/api/users", json={"name": "alice"})
         
         p1 = {
