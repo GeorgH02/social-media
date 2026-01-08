@@ -13,7 +13,15 @@ from sqlalchemy import create_engine
 RABBIT_HOST = os.getenv("RABBIT_HOST", "queue")
 QUEUE_NAME = os.getenv("RESIZE_QUEUE", "resize")
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///test.db")
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    default_db_path = os.getenv("DB_FILE_PATH", "/data/social-media.db")
+    try:
+        os.makedirs(os.path.dirname(default_db_path), exist_ok=True)
+    except Exception:
+        pass
+    DATABASE_URL = f"sqlite:///{default_db_path}"
+    print(f"Warning: DATABASE_URL not set, falling back to {DATABASE_URL}")
 
 THUMB_DIR = os.getenv("THUMB_DIR", "/data/thumbs")
 PUBLIC_PREFIX = os.getenv("THUMB_PUBLIC_PREFIX", "/thumbs")  

@@ -8,7 +8,6 @@ from typing import List, Optional
 from class_manager import Post, User, PostCreate, UserCreate, create_database
 import pika
 import json
-from ml_service.ml import classify_text
 from starlette.concurrency import run_in_threadpool
 import logging
 
@@ -180,10 +179,19 @@ async def api_get_post_sentiment(post_id: int):
         if not post.text:
             raise HTTPException(status_code=400, detail="Post has no text to analyze")
         try:
+            # Lazy-import ML classifier to avoid importing heavy ML deps at module import time
+            try:
+                from ml_service.ml import classify_text
+            except Exception as e:
+                logging.exception("Could not import ML classifier: %s", e)
+                raise HTTPException(status_code=500, detail="ML classifier not available")
+
             result = await run_in_threadpool(classify_text, post.text)
             label = max(result[0], key=lambda d: d["score"])["label"]
             page_result = f"The sentiment of this post is {label}."
             return {"post_id": post_id, "text": post.text, "sentiment": page_result}
+        except HTTPException:
+            raise
         except Exception as e:
             logging.exception("Sentiment analysis failed for post %s", post_id)
             raise HTTPException(status_code=500, detail=f"Sentiment analysis failed: {e}")

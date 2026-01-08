@@ -55,6 +55,7 @@ services:
       THUMB_DIR: /data/thumbs
       THUMB_PUBLIC_PREFIX: /thumbs
       THUMB_SIZE: 256
+      PYTHONUNBUFFERED: 1
     volumes:
       - ./data/thumbs:/data/thumbs
     depends_on:
