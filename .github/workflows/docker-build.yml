@@ -53,6 +53,8 @@ jobs:
       - name: Run resize worker tests
         run: |
           cd backend/resize_service
+          # Ensure Python can import modules from the parent `backend` directory
+          export PYTHONPATH="$(pwd)/.."
           python -m unittest test_worker -v
 
       - name: Log in to GitHub Container Registry

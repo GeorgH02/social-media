@@ -2,6 +2,12 @@ import unittest
 import json
 import os
 from unittest.mock import patch
+import sys
+from pathlib import Path
+
+# Ensure the repository's `backend` package is importable when tests run
+# (CI runs these tests from backend/resize_service, so add parent `backend` dir)
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 class TestResizeWorker(unittest.TestCase):
     def test_ensure_connection_environment_variable(self):
