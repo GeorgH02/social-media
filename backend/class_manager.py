@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from sqlmodel import Field, Session, SQLModel, create_engine, select
 
 class Post(SQLModel, table=True):
@@ -24,18 +25,14 @@ class User(SQLModel, table=True):
 class UserCreate(SQLModel):
     name: str
 
-# def create_database():
-#     backend_directory = os.path.dirname(os.path.abspath(__file__))
-#     db_path = os.path.join(backend_directory, "social-media-database.db")
-#     engine = create_engine(f"sqlite:///{db_path}")
-#     SQLModel.metadata.create_all(engine)
-#     return engine
-
 def create_database():
     DATABASE_URL = os.environ.get("DATABASE_URL")
     if not DATABASE_URL:
-        print("DATABASE_URL not set — skipping database initialization")
-        return None
+        db_path = Path(__file__).parent / "social-media-database.db"
+        DATABASE_URL = f"sqlite:///{db_path}"
+        print(f"DATABASE_URL not set — using default: {DATABASE_URL}")
+    else:
+        print(f"DATABASE_URL is set: {DATABASE_URL}")
     engine = create_engine(DATABASE_URL, echo=True)
     SQLModel.metadata.create_all(engine)
     return engine
@@ -54,9 +51,9 @@ def get_latest_post(engine):
 
 
 def main():
-    post_1 = Post(image="https://example.com/sunset.jpg", text="A sunset :)", user="john01")
-    post_2 = Post(image="https://example.com/coffee.jpg", text="I like coffee", user="_maria2")
-    post_3 = Post(image="https://example.com/dog.jpg", text="Cute dog alert", user="jessica184")
+    post_1 = Post(image_full="https://example.com/sunset.jpg", text="A sunset :)", user="john01", country="Austria", filter="Nature")
+    post_2 = Post(image_full="https://example.com/coffee.jpg", text="I like coffee", user="_maria2", country="Italy", filter="City")
+    post_3 = Post(image_full="https://example.com/dog.jpg", text="Cute dog alert", user="jessica184", country="United Kingdom", filter="Nature")
     
     engine = create_database()
     add_posts(engine, [post_1, post_2, post_3])
@@ -68,7 +65,7 @@ def main():
         print(f"ID: {latest_post.id}")
         print(f"User: {latest_post.user}")
         print(f"Text: {latest_post.text}")
-        print(f"Image: {latest_post.image}")
+        print(f"Image: {latest_post.image_full}")
     else:
         print("No posts found")
 

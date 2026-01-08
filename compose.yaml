@@ -63,6 +63,18 @@ services:
       queue:
         condition: service_started
 
+  ml_service:
+    build:
+      context: .
+      dockerfile: backend/ml_service/Dockerfile
+    container_name: social_media_ml_service
+    environment:
+      RABBIT_HOST: queue
+      ML_QUEUE: sentiment
+    depends_on:
+      queue:
+        condition: service_started
+
 
 volumes:
   postgres_data:

@@ -17,16 +17,13 @@ RUN pip install --no-cache-dir \
 RUN pip install --no-cache-dir \
     transformers==4.36.0
 
-COPY requirements.txt /app/
+COPY backend/ml_service/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
-COPY backend /app/backend
-COPY frontend /app/frontend
+COPY backend/ml_service/download_model.py /app/download_model.py
+COPY backend/ml_service/worker.py /app/worker.py
+COPY backend/ml_service/ml.py /app/ml.py
 
-RUN python /app/backend/ml_service/download_model.py
+RUN python /app/download_model.py
 
-WORKDIR /app/backend
-
-EXPOSE 8000
-
-CMD ["uvicorn", "rest_api:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "worker.py"]

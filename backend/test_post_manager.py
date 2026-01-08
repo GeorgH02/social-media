@@ -2,9 +2,11 @@ import sys
 import sqlite3
 import subprocess
 import unittest
+import os
 from pathlib import Path
 
-DB_PATH = Path("social-media-database.db")
+# Use DATABASE_URL if set (from CI), otherwise use default
+DB_PATH = Path(os.getenv("DATABASE_URL", "sqlite:///social-media-database.db").replace("sqlite:///", ""))
 
 
 class TestPostManagerScript(unittest.TestCase):
@@ -17,7 +19,7 @@ class TestPostManagerScript(unittest.TestCase):
 
     def test_script_runs_and_prints_latest(self):
         result = subprocess.run(
-            [sys.executable, "post_manager.py"],
+            [sys.executable, "class_manager.py"],
             capture_output=True,
             text=True
         )

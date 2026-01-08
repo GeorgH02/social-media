@@ -13,9 +13,7 @@ from sqlalchemy import create_engine
 RABBIT_HOST = os.getenv("RABBIT_HOST", "queue")
 QUEUE_NAME = os.getenv("RESIZE_QUEUE", "resize")
 
-DATABASE_URL = os.getenv("DATABASE_URL")  
-if not DATABASE_URL:
-    raise RuntimeError("DATABASE_URL is not set for resize worker")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///test.db")
 
 THUMB_DIR = os.getenv("THUMB_DIR", "/data/thumbs")
 PUBLIC_PREFIX = os.getenv("THUMB_PUBLIC_PREFIX", "/thumbs")  

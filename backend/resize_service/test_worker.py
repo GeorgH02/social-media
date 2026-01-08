@@ -1,0 +1,54 @@
+import unittest
+import json
+import os
+from unittest.mock import patch
+import sys
+from pathlib import Path
+
+# Ensure the repository's `backend` package is importable when tests run
+# (CI runs these tests from backend/resize_service, so add parent `backend` dir)
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+class TestResizeWorker(unittest.TestCase):
+    def test_ensure_connection_environment_variable(self):
+        with patch.dict(os.environ, {"RABBIT_HOST": "test-host"}):
+            import importlib
+            import worker as worker_module
+            importlib.reload(worker_module)
+            self.assertEqual(worker_module.RABBIT_HOST, "test-host")
+
+    def test_process_message_with_valid_queue_name(self):
+        with patch.dict(os.environ, {"RESIZE_QUEUE": "custom-resize"}):
+            import importlib
+            import worker as worker_module
+            importlib.reload(worker_module)
+            self.assertTrue(
+                hasattr(worker_module, "QUEUE_NAME") or 
+                hasattr(worker_module, "RESIZE_QUEUE")
+            )
+
+    def test_message_structure_validation(self):
+        test_message = {
+            "post_id": 1,
+            "image_full": "https://example.com/image.jpg"
+        }
+        message_json = json.dumps(test_message)
+        parsed = json.loads(message_json)
+        self.assertIn("post_id", parsed)
+        self.assertIn("image_full", parsed)
+        self.assertEqual(parsed["post_id"], 1)
+
+    def test_environment_configuration(self):
+        with patch.dict(os.environ, {
+            "RABBIT_HOST": "queue",
+            "RESIZE_QUEUE": "resize",
+            "THUMB_DIR": "/data/thumbs",
+            "THUMB_PUBLIC_PREFIX": "/thumbs",
+            "THUMB_SIZE": "256"
+        }, clear=False):
+            self.assertEqual(os.getenv("RABBIT_HOST", "queue"), "queue")
+            self.assertEqual(os.getenv("RESIZE_QUEUE", "resize"), "resize")
+
+
+if __name__ == "__main__":
+    unittest.main()

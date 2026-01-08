@@ -269,6 +269,38 @@
               "type": "string",
               "title": "Username"
             }
+          },
+          {
+            "name": "country",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Country"
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Filter"
+            }
           }
         ],
         "responses": {
@@ -303,17 +335,61 @@
       "get": {
         "summary": "Api Get All Posts",
         "operationId": "api_get_all_posts_api_posts_get",
+        "parameters": [
+          {
+            "name": "country",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Country"
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Filter"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
+                  "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/Post"
                   },
-                  "type": "array",
                   "title": "Response Api Get All Posts Api Posts Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -324,14 +400,14 @@
         "summary": "Api Create Post",
         "operationId": "api_create_post_api_posts_post",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/PostCreate"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "201": {
@@ -395,6 +471,43 @@
           }
         }
       }
+    },
+    "/api/posts/{post_id}/sentiment": {
+      "get": {
+        "summary": "Api Get Post Sentiment",
+        "operationId": "api_get_post_sentiment_api_posts__post_id__sentiment_get",
+        "parameters": [
+          {
+            "name": "post_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Post Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -425,9 +538,20 @@
             ],
             "title": "Id"
           },
-          "image": {
+          "image_full": {
             "type": "string",
-            "title": "Image"
+            "title": "Image Full"
+          },
+          "image_thumb": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Thumb"
           },
           "text": {
             "anyOf": [
@@ -443,20 +567,30 @@
           "user": {
             "type": "string",
             "title": "User"
+          },
+          "country": {
+            "type": "string",
+            "title": "Country"
+          },
+          "filter": {
+            "type": "string",
+            "title": "Filter"
           }
         },
         "type": "object",
         "required": [
-          "image",
-          "user"
+          "image_full",
+          "user",
+          "country",
+          "filter"
         ],
         "title": "Post"
       },
       "PostCreate": {
         "properties": {
-          "image": {
+          "image_full": {
             "type": "string",
-            "title": "Image"
+            "title": "Image Full"
           },
           "text": {
             "anyOf": [
@@ -472,12 +606,22 @@
           "user": {
             "type": "string",
             "title": "User"
+          },
+          "country": {
+            "type": "string",
+            "title": "Country"
+          },
+          "filter": {
+            "type": "string",
+            "title": "Filter"
           }
         },
         "type": "object",
         "required": [
-          "image",
-          "user"
+          "image_full",
+          "user",
+          "country",
+          "filter"
         ],
         "title": "PostCreate"
       },
