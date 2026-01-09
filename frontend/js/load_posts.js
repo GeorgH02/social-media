@@ -176,7 +176,13 @@ function fetchPosts() {
 
                     if (post.image_full) {
                         imageElement.style.cursor = "pointer";
-                        imageElement.addEventListener("click", () => window.open(post.image_full, "_blank"));
+                        imageElement.addEventListener("click", () => {
+                            let url = post.image_full;
+                            if (url.startsWith('/')) {
+                                url = window.location.origin + url;
+                            }
+                            window.open(url, '_blank');
+                        });
                     }
 
                     postElement.appendChild(userElement);
